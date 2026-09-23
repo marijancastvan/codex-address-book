@@ -8,6 +8,7 @@ export function validateContact(formData: FormData): { value?: ContactInput; err
     city_id: String(formData.get("city_id") ?? "").trim(),
   };
   if (!value.first_name || !value.last_name || !value.phone || !value.email || !value.city_id) return { error: "Popunite sva obavezna polja." };
+  if (!/^(?=.*\d)[0-9+()\s-]+$/.test(value.phone)) return { error: "Unesite ispravan broj telefona." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email)) return { error: "Unesite ispravnu email adresu." };
   return { value };
 }
