@@ -15,7 +15,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
   if (!user) redirect("/login");
 
   const citiesRequest = supabase.from("cities").select("id, name").order("name");
-  let contactsRequest = supabase.from("contacts").select("id, first_name, last_name, phone, email, city_id, cities(name)").eq("user_id", user.id).order("last_name").order("first_name");
+  let contactsRequest = supabase.from("contacts").select("id, first_name, last_name, phone, email, city_id, cities(name)").eq("user_id", user.id).order("first_name").order("last_name");
   const term = params.q?.trim() ?? "";
   const safeTerm = term.replace(/[,%()]/g, " ").trim();
   if (safeTerm) contactsRequest = contactsRequest.or(`first_name.ilike.%${safeTerm}%,last_name.ilike.%${safeTerm}%,phone.ilike.%${safeTerm}%,email.ilike.%${safeTerm}%`);
