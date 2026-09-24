@@ -16,15 +16,16 @@ export async function updateSession(request: NextRequest) {
     },
   });
   const { data: { user } } = await supabase.auth.getUser();
-  if (request.nextUrl.pathname.startsWith("/contacts") && !user) {
+  const pathname = request.nextUrl.pathname;
+  const protectedRoute = ["/contacts", "/cities", "/dashboard", "/reset-password"].some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  if (protectedRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
-  if ((request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register") && user) {
+  if (["/login", "/register", "/forgot-password"].includes(pathname) && user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/contacts";
+    redirectUrl.pathname = "/dashboard";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

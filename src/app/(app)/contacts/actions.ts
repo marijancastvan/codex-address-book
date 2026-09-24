@@ -1,31 +1,26 @@
 "use server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { validateContact } from "@/lib/validation";
+import { validateContact, type ContactFieldErrors } from "@/lib/validation";
 
-export async function saveContact(formData: FormData) {
+export type SaveContactResult = { fieldErrors?: ContactFieldErrors; formError?: string; success?: boolean };
+
+export async function saveContact(formData: FormData): Promise<SaveContactResult> {
   const parsed = validateContact(formData);
-  if (parsed.error || !parsed.value) redirect(`/contacts?error=${encodeURIComponent(parsed.error ?? "Neispravan kontakt.")}`);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
   const id = String(formData.get("id") ?? "").trim();
-  const query = id ? supabase.from("contacts").update(parsed.value).eq("id", id).eq("user_id", user.id) : supabase.from("contacts").insert({ ...parsed.value, user_id: user.id });
+  if (!parsed.value) return { fieldErrors: parsed.fieldErrors };
+  const supabase = await createClient();
+  const query = id ? supabase.from("contacts").update(parsed.value).eq("id", id) : supabase.from("contacts").insert(parsed.value);
   const { error } = await query;
-  if (error) redirect(`/contacts?error=${encodeURIComponent(error.message)}`);
-  revalidatePath("/contacts");
-  redirect("/contacts");
+  if (error) return { formError: error.message };
+  return { success: true };
 }
 export async function deleteContact(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) redirect("/contacts");
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  const { error } = await supabase.from("contacts").delete().eq("id", id).eq("user_id", user.id);
-  if (error) redirect(`/contacts?error=${encodeURIComponent(error.message)}`);
-  revalidatePath("/contacts");
+  const { error } = await supabase.from("contacts").delete().eq("id", id);
+  if (error) redirect(`/contacts?confirmDelete=${encodeURIComponent(id)}&error=${encodeURIComponent(error.message)}`);
   redirect("/contacts");
 }
 export async function logout() {

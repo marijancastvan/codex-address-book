@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const next = request.nextUrl.searchParams.get("next");
-  const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/contacts";
+  const destination = next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
   if (code) {
     const supabase = await createClient();
@@ -13,6 +13,6 @@ export async function GET(request: NextRequest) {
   }
 
   const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("error", "Potvrda email adrese nije uspela. Pokušajte ponovo da se prijavite.");
+  loginUrl.searchParams.set("error", "Link za potvrdu ili promenu lozinke nije važeći. Pokušajte ponovo.");
   return NextResponse.redirect(loginUrl);
 }
