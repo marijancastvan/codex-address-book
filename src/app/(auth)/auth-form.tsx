@@ -27,7 +27,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
         if (authError) throw authError;
         router.replace("/dashboard");
-        router.refresh();
       } else {
         const { data: result, error: authError } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` } });
         if (authError) throw authError;

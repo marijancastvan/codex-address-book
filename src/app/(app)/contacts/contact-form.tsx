@@ -41,7 +41,6 @@ export function ContactForm({
       const result = await saveContact(new FormData(event.currentTarget));
       if (result.success) {
         router.replace("/contacts");
-        router.refresh();
         return;
       }
       setFieldErrors(result.fieldErrors ?? {});
