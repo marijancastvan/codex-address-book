@@ -23,6 +23,15 @@ button.danger { background: #a83c3c; }
 .toolbar input { flex: 1; }
 .contact-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }
 .contact-form .actions { grid-column: 1 / -1; justify-content: flex-start; }
+.city-picker { position: relative; min-width: 0; }
+.city-picker > label { display: grid; gap: 6px; }
+.city-picker input { width: 100%; min-width: 0; }
+.city-results { max-height: 220px; overflow-y: auto; margin: 6px 0 0; padding: 4px; border: 1px solid var(--line); border-radius: 7px; background: white; list-style: none; }
+.city-result { width: 100%; padding: 9px 10px; background: white; color: var(--ink); text-align: left; font-weight: 400; }
+.city-result:hover, .city-result:focus-visible { background: var(--wash); }
+.city-search-status, .city-search-error { margin: 6px 0 0; font-size: .9rem; }
+.city-search-status { color: var(--muted); }
+.city-search-error { color: #a12626; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; }

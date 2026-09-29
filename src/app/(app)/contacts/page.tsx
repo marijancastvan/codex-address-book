@@ -14,15 +14,15 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const citiesRequest = supabase.from("cities").select("id, name").order("name");
   let contactsRequest = supabase.from("contacts").select("id, first_name, last_name, phone, email, city_id, cities(name)").eq("user_id", user.id).order("first_name").order("last_name");
   const term = params.q?.trim() ?? "";
   const safeTerm = term.replace(/[,%()]/g, " ").trim();
   if (safeTerm) contactsRequest = contactsRequest.or(`first_name.ilike.%${safeTerm}%,last_name.ilike.%${safeTerm}%,phone.ilike.%${safeTerm}%,email.ilike.%${safeTerm}%`);
-  const [{ data: cities, error: cityError }, { data: contacts, error }] = await Promise.all([citiesRequest, contactsRequest]);
+  const { data: contacts, error } = await contactsRequest;
 
   const editing = params.edit ? contacts?.find((contact) => contact.id === params.edit) : undefined;
   const input = editing ?? { first_name: "", last_name: "", phone: "", email: "", city_id: "" };
+  const editingCity = editing?.cities as unknown as { name: string } | null | undefined;
   const closeHref = term ? `/contacts?q=${encodeURIComponent(term)}` : "/contacts";
   const deleting = params.confirmDelete ? contacts?.find((contact) => contact.id === params.confirmDelete) : undefined;
 
@@ -33,7 +33,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
         <div className="actions"><Link href="/cities">Mesta</Link><form action={logout}><button className="secondary">Odjava</button></form></div>
       </header>
       {params.error && !params.new && !params.edit && !params.confirmDelete && <p className="error" role="alert">{params.error}</p>}
-      {(error || cityError) && <p className="error" role="alert">{error?.message ?? cityError?.message}</p>}
+      {error && <p className="error" role="alert">{error.message}</p>}
       <div className="toolbar">
         <ContactSearch initialValue={term} />
         <Link className="button-link" href={`/contacts?new=contact${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Novi kontakt</Link>
@@ -51,7 +51,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
     </section>
 
     {(params.new === "contact" || editing) && <Modal title={editing ? "Izmena kontakta" : "Novi kontakt"} closeHref={closeHref}>
-      {cityError ? <p className="error" role="alert">Lista mesta nije dostupna: {cityError.message}</p> : <ContactForm initialValue={{ ...input, id: editing?.id ?? "" }} cities={cities ?? []} closeHref={closeHref} editing={Boolean(editing)} />}
+      <ContactForm initialValue={{ ...input, id: editing?.id ?? "" }} initialCity={editing && editingCity ? { id: editing.city_id, name: editingCity.name } : null} closeHref={closeHref} editing={Boolean(editing)} />
     </Modal>}
 
     {params.confirmDelete && deleting && <Modal title="Brisanje kontakta" closeHref={closeHref}>
