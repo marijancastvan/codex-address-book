@@ -15,15 +15,19 @@ export default async function CitiesPage({ searchParams }: { searchParams: Searc
   const editing = params.edit ? cities?.find((city) => city.id === params.edit) : undefined;
   const deleting = params.confirmDelete ? cities?.find((city) => city.id === params.confirmDelete) : undefined;
 
-  return <main className="shell"><section className="panel">
-    <header className="heading">
-      <div><p><Link href="/dashboard">← Početna</Link></p><h1>Mesta</h1><p className="subtle">Prijavljeni ste kao {user.email}</p></div>
-      <div className="actions"><Link href="/contacts">Kontakti</Link><Link className="button-link" href="/cities?new=city">Novo mesto</Link></div>
+  return <main className="shell"><section className="panel data-panel">
+    <header className="heading data-page-header">
+      <div className="page-heading-copy">
+        <p className="breadcrumb"><Link href="/dashboard">← Početna</Link></p>
+        <div className="page-title-row"><span className="page-title-accent" aria-hidden="true" /><h1>Mesta</h1></div>
+        <p className="page-user-chip"><span className="page-user-label">Prijavljeni ste kao</span><span className="page-user-email">{user.email}</span></p>
+      </div>
+      <div className="actions data-page-actions"><Link href="/contacts">Kontakti</Link><Link className="button-link" href="/cities?new=city">Novo mesto</Link></div>
     </header>
     {params.error && !params.new && !params.edit && !params.confirmDelete && <p className="error" role="alert">{params.error}</p>}
-    {error ? <p className="error" role="alert">Mesta trenutno nisu dostupna: {error.message}</p> : cities?.length ? <div className="table-wrap"><table><thead><tr><th>Naziv mesta</th><th>Akcije</th></tr></thead><tbody>{cities.map((city) => <tr key={city.id}>
+    {error ? <p className="error empty-state" role="alert">Mesta trenutno nisu dostupna: {error.message}</p> : cities?.length ? <div className="table-wrap data-table-wrap"><table className="data-table cities-table"><thead><tr><th>Naziv mesta</th><th>Akcije</th></tr></thead><tbody>{cities.map((city) => <tr key={city.id}>
       <td>{city.name}</td><td><div className="row-actions"><Link className="button-link secondary" href={`/cities?edit=${city.id}`}>Izmeni</Link><Link className="button-link danger" href={`/cities?confirmDelete=${city.id}`}>Obriši</Link></div></td>
-    </tr>)}</tbody></table></div> : <p className="subtle">Nema unetih mesta. Dodajte prvo mesto.</p>}
+    </tr>)}</tbody></table></div> : <p className="subtle empty-state">Nema unetih mesta. Dodajte prvo mesto.</p>}
 
     {(params.new === "city" || editing) && <Modal title={editing ? "Izmena mesta" : "Novo mesto"} closeHref="/cities">
       {params.error && <p className="error" role="alert">{params.error}</p>}

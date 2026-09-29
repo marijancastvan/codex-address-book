@@ -27,19 +27,23 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
   const deleting = params.confirmDelete ? contacts?.find((contact) => contact.id === params.confirmDelete) : undefined;
 
   return <main className="shell">
-    <section className="panel">
-      <header className="heading">
-        <div><p><Link href="/dashboard">← Početna</Link></p><h1>Moji kontakti</h1><p className="subtle">Prijavljeni ste kao {user.email}</p></div>
-        <div className="actions"><Link href="/cities">Mesta</Link><form action={logout}><button className="secondary">Odjava</button></form></div>
+    <section className="panel data-panel">
+      <header className="heading data-page-header">
+        <div className="page-heading-copy">
+          <p className="breadcrumb"><Link href="/dashboard">← Početna</Link></p>
+          <div className="page-title-row"><span className="page-title-accent" aria-hidden="true" /><h1>Moji kontakti</h1></div>
+          <p className="page-user-chip"><span className="page-user-label">Prijavljeni ste kao</span><span className="page-user-email">{user.email}</span></p>
+        </div>
+        <div className="actions data-page-actions"><Link href="/cities">Mesta</Link><form action={logout}><button className="secondary">Odjava</button></form></div>
       </header>
       {params.error && !params.new && !params.edit && !params.confirmDelete && <p className="error" role="alert">{params.error}</p>}
       {error && <p className="error" role="alert">{error.message}</p>}
-      <div className="toolbar">
+      <div className="toolbar contacts-toolbar">
         <ContactSearch initialValue={term} />
         <Link className="button-link" href={`/contacts?new=contact${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Novi kontakt</Link>
       </div>
-      {error ? <p className="subtle">Kontakti trenutno nisu dostupni.</p> : contacts?.length ? <>
-        <div className="table-wrap contact-desktop"><table><thead><tr><th>Ime i prezime</th><th>Telefon</th><th>Email</th><th>Mesto</th><th>Akcije</th></tr></thead><tbody>{contacts.map((contact) => <tr key={contact.id}>
+      {error ? <p className="subtle empty-state">Kontakti trenutno nisu dostupni.</p> : contacts?.length ? <>
+        <div className="table-wrap data-table-wrap contact-desktop"><table className="data-table contact-table"><thead><tr><th>Ime i prezime</th><th>Telefon</th><th>Email</th><th>Mesto</th><th>Akcije</th></tr></thead><tbody>{contacts.map((contact) => <tr key={contact.id}>
           <td>{contact.first_name} {contact.last_name}</td><td>{contact.phone}</td><td>{contact.email}</td><td>{(contact.cities as unknown as { name: string } | null)?.name ?? "—"}</td>
           <td><div className="row-actions"><Link className="button-link secondary" href={`/contacts?edit=${contact.id}${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Izmeni</Link><Link className="button-link danger" href={`/contacts?confirmDelete=${contact.id}${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Obriši</Link></div></td>
         </tr>)}</tbody></table></div>
@@ -47,7 +51,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
           <h2>{contact.first_name} {contact.last_name}</h2><dl><dt>Telefon</dt><dd>{contact.phone}</dd><dt>Email</dt><dd>{contact.email}</dd><dt>Mesto</dt><dd>{(contact.cities as unknown as { name: string } | null)?.name ?? "—"}</dd></dl>
           <div className="row-actions"><Link className="button-link secondary" href={`/contacts?edit=${contact.id}${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Izmeni</Link><Link className="button-link danger" href={`/contacts?confirmDelete=${contact.id}${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Obriši</Link></div>
         </article>)}</div>
-      </> : <p className="subtle">{term ? "Nema kontakata koji odgovaraju pretrazi." : "Još nemate kontakte. Izaberite „Novi kontakt“ da dodate prvi."}</p>}
+      </> : <p className="subtle empty-state">{term ? "Nema kontakata koji odgovaraju pretrazi." : "Još nemate kontakte. Izaberite „Novi kontakt“ da dodate prvi."}</p>}
     </section>
 
     {(params.new === "contact" || editing) && <Modal title={editing ? "Izmena kontakta" : "Novi kontakt"} closeHref={closeHref}>

@@ -37,7 +37,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setError(cause instanceof Error ? cause.message : "Došlo je do greške. Pokušajte ponovo.");
     } finally { setBusy(false); }
   }
-  return <main className="auth-card">
+  return <main className="auth-card auth-page">
     <h1>{mode === "login" ? "Prijava" : "Kreiranje naloga"}</h1><p className="subtle">Address Book</p>
     <form className="stack" onSubmit={submit} noValidate>
       <label>Email<input name="email" type="email" autoComplete="email" required /></label>
