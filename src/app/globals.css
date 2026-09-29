@@ -149,6 +149,13 @@ button.danger:hover:not(:disabled) { background: #8f3030; }
 .contacts-toolbar { align-items: flex-end; gap: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-section); }
 .contacts-toolbar .search-label { min-width: 0; }
 .contacts-toolbar .button-link { flex: 0 0 auto; }
+.dummy-generator { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 160px) auto; align-items: end; gap: var(--space-4); margin: 0 0 var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-4); background: linear-gradient(110deg, var(--color-section), var(--color-panel)); }
+.dummy-generator-copy { display: grid; gap: var(--space-1); align-self: center; }
+.dummy-generator-copy strong { color: var(--color-primary); }
+.dummy-generator-copy span { color: var(--color-muted); font-size: .9rem; }
+.dummy-generator label { min-width: 0; font-size: .9rem; }
+.dummy-generator input { min-width: 0; }
+.dummy-generator > .success, .dummy-generator > .error { grid-column: 1 / -1; margin: 0; }
 .empty-state { margin: var(--space-5) 0 0; border: 1px dashed var(--color-border); border-radius: var(--radius-card); padding: var(--space-5); background: var(--color-section); }
 .contact-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: var(--space-5) 0; }
 .contact-form .actions { grid-column: 1 / -1; justify-content: flex-start; }
@@ -257,6 +264,7 @@ th { color: var(--color-muted); font-size: .9rem; }
   .page-heading-copy { width: 100%; flex: 0 1 auto; }
   .page-user-chip { max-width: 100%; border-radius: var(--radius-card); }
   .data-page-actions { width: 100%; justify-content: flex-start; }
+  .dummy-generator { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ContactSearch } from "@/components/contact-search";
 import { Modal } from "@/components/modal";
 import { ContactForm } from "./contact-form";
+import { DummyContactForm } from "./dummy-contact-form";
 import { deleteContact, logout } from "./actions";
 
 type SearchParams = Promise<{ q?: string; edit?: string; new?: string; confirmDelete?: string; error?: string }>;
@@ -42,6 +43,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
         <ContactSearch initialValue={term} />
         <Link className="button-link" href={`/contacts?new=contact${term ? `&q=${encodeURIComponent(term)}` : ""}`}>Novi kontakt</Link>
       </div>
+      <DummyContactForm />
       {error ? <p className="subtle empty-state">Kontakti trenutno nisu dostupni.</p> : contacts?.length ? <>
         <div className="table-wrap data-table-wrap contact-desktop"><table className="data-table contact-table"><thead><tr><th>Ime i prezime</th><th>Telefon</th><th>Email</th><th>Mesto</th><th>Akcije</th></tr></thead><tbody>{contacts.map((contact) => <tr key={contact.id}>
           <td>{contact.first_name} {contact.last_name}</td><td>{contact.phone}</td><td>{contact.email}</td><td>{(contact.cities as unknown as { name: string } | null)?.name ?? "—"}</td>

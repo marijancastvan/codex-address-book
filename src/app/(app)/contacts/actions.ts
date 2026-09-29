@@ -1,4 +1,6 @@
 "use server";
+import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { validateContact, type ContactFieldErrors } from "@/lib/validation";
@@ -8,6 +10,63 @@ type CityOption = { id: string; name: string };
 export type CreateCityForContactResult =
   | { success: true; city: CityOption }
   | { success: false; error: string };
+export type CreateDummyContactsResult =
+  | { success: true; count: number }
+  | { success: false; error: string };
+
+export async function createDummyContacts(formData: FormData): Promise<CreateDummyContactsResult> {
+  const rawQuantity = String(formData.get("quantity") ?? "").trim();
+  if (!/^\d+$/.test(rawQuantity)) {
+    return { success: false, error: "Unesite ceo broj od 1 do 500." };
+  }
+
+  const quantity = Number(rawQuantity);
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 500) {
+    return { success: false, error: "Količina mora biti ceo broj od 1 do 500." };
+  }
+
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { success: false, error: "Sesija je istekla. Prijavite se ponovo." };
+  }
+
+  const { data: cities, error: citiesError } = await supabase.from("cities").select("id");
+  if (citiesError) {
+    return { success: false, error: "Lista mesta nije dostupna. Pokušajte ponovo." };
+  }
+  if (!cities?.length) {
+    return { success: false, error: "Nema unetih mesta. Dodajte mesto pre kreiranja dummy kontakata." };
+  }
+
+  const batchId = randomUUID().replace(/-/g, "");
+  const phoneBase = Number.parseInt(batchId.slice(-10), 16) % 10_000_000_000;
+  const contacts = Array.from({ length: quantity }, (_, index) => {
+    const sequence = String(index + 1).padStart(3, "0");
+    const numericSuffix = (phoneBase + index) % 10_000_000_000;
+    return {
+      first_name: "Dummy",
+      last_name: `${batchId}-${sequence}`,
+      phone: `+1555${String(numericSuffix).padStart(10, "0")}`,
+      email: `dummy.${batchId}.${sequence}@example.test`,
+      city_id: cities[index % cities.length].id,
+    };
+  });
+
+  const { error: insertError } = await supabase.from("contacts").insert(contacts);
+  if (insertError) {
+    if (insertError.code === "42501") {
+      return { success: false, error: "Nemate dozvolu za kreiranje kontakata. Prijavite se ponovo." };
+    }
+    if (insertError.code === "23503") {
+      return { success: false, error: "Jedno od mesta više nije dostupno. Osvežite stranicu i pokušajte ponovo." };
+    }
+    return { success: false, error: "Kreiranje dummy kontakata nije uspelo. Pokušajte ponovo." };
+  }
+
+  revalidatePath("/contacts");
+  return { success: true, count: quantity };
+}
 
 export async function createCityForContact(rawName: string): Promise<CreateCityForContactResult> {
   const name = rawName.trim();
