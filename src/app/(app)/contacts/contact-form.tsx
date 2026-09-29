@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { createCityForContact, saveContact } from "./actions";
@@ -161,6 +162,6 @@ export function ContactForm({
       {fieldErrors.city_id && <span className="field-error" id="contact-city-error" role="alert">{fieldErrors.city_id}</span>}
     </div>
     {formError && <p className="error" role="alert">{formError}</p>}
-    <div className="actions"><button disabled={busy}>{busy ? "Čuvanje…" : editing ? "Sačuvaj izmene" : "Sačuvaj kontakt"}</button><a className="button-link secondary" href={closeHref}>Otkaži</a></div>
+    <div className="actions"><button disabled={busy}>{busy ? "Čuvanje…" : editing ? "Sačuvaj izmene" : "Sačuvaj kontakt"}</button><Link className="button-link secondary" href={closeHref}>Otkaži</Link></div>
   </form>;
 }
