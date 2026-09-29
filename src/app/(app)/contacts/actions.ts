@@ -4,6 +4,40 @@ import { createClient } from "@/lib/supabase/server";
 import { validateContact, type ContactFieldErrors } from "@/lib/validation";
 
 export type SaveContactResult = { fieldErrors?: ContactFieldErrors; formError?: string; success?: boolean };
+type CityOption = { id: string; name: string };
+export type CreateCityForContactResult =
+  | { success: true; city: CityOption }
+  | { success: false; error: string };
+
+export async function createCityForContact(rawName: string): Promise<CreateCityForContactResult> {
+  const name = rawName.trim();
+  if (!name) return { success: false, error: "Naziv mesta je obavezan." };
+  if (name.length > 100) return { success: false, error: "Naziv mesta može imati najviše 100 znakova." };
+
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { success: false, error: "Prijavite se da biste kreirali mesto." };
+
+  const { data, error } = await supabase
+    .from("cities")
+    .insert({ name })
+    .select("id, name")
+    .single();
+
+  if (!error && data) return { success: true, city: data };
+  if (error?.code === "23505") {
+    const escapedName = name.replace(/[\\%_]/g, "\\$&");
+    const { data: matches, error: lookupError } = await supabase
+      .from("cities")
+      .select("id, name")
+      .ilike("name", `%${escapedName}%`);
+    const existingCity = matches?.find((city) => city.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase());
+    if (!lookupError && existingCity) return { success: true, city: existingCity };
+    return { success: false, error: "Mesto sa ovim nazivom već postoji, ali nije moglo da se učita. Pokušajte ponovo." };
+  }
+
+  return { success: false, error: error?.message ?? "Kreiranje mesta nije uspelo. Pokušajte ponovo." };
+}
 
 export async function saveContact(formData: FormData): Promise<SaveContactResult> {
   const parsed = validateContact(formData);

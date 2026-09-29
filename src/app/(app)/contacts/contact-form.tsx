@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { saveContact } from "./actions";
+import { createCityForContact, saveContact } from "./actions";
 import type { ContactFieldErrors, ContactInput } from "@/lib/validation";
 
 type CityOption = { id: string; name: string };
@@ -30,6 +30,8 @@ export function ContactForm({
   const [cityResults, setCityResults] = useState<CityOption[]>([]);
   const [cityLoading, setCityLoading] = useState(false);
   const [citySearchError, setCitySearchError] = useState("");
+  const [cityCreateLoading, setCityCreateLoading] = useState(false);
+  const [cityCreateError, setCityCreateError] = useState("");
 
   useEffect(() => {
     const term = cityText.trim();
@@ -84,6 +86,7 @@ export function ContactForm({
   function updateCityText(value: string) {
     setCityText(value);
     setSelectedCity(null);
+    setCityCreateError("");
     updateField("city_id", "");
   }
 
@@ -93,6 +96,25 @@ export function ContactForm({
     updateField("city_id", city.id);
     setCityResults([]);
     setCitySearchError("");
+    setCityCreateError("");
+  }
+
+  async function createCity() {
+    if (cityCreateLoading) return;
+    setCityCreateLoading(true);
+    setCityCreateError("");
+    try {
+      const result = await createCityForContact(cityText);
+      if (result.success) {
+        selectCity(result.city);
+      } else {
+        setCityCreateError(result.error);
+      }
+    } catch {
+      setCityCreateError("Kreiranje mesta nije uspelo. Pokušajte ponovo.");
+    } finally {
+      setCityCreateLoading(false);
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -124,11 +146,15 @@ export function ContactForm({
     <label htmlFor="contact-phone">Telefon<input id="contact-phone" name="phone" type="tel" value={values.phone} onChange={(event) => updateField("phone", event.target.value)} maxLength={40} aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? "contact-phone-error" : undefined} />{fieldErrors.phone && <span className="field-error" id="contact-phone-error" role="alert">{fieldErrors.phone}</span>}</label>
     <label htmlFor="contact-email">Email<input id="contact-email" name="email" type="email" value={values.email} onChange={(event) => updateField("email", event.target.value)} maxLength={254} aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? "contact-email-error" : undefined} />{fieldErrors.email && <span className="field-error" id="contact-email-error" role="alert">{fieldErrors.email}</span>}</label>
     <div className="city-picker">
-      <label htmlFor="contact-city">Mesto<input id="contact-city" type="search" value={cityText} onChange={(event) => updateCityText(event.target.value)} placeholder="Pretražite mesta" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={cityResults.length > 0} aria-controls="contact-city-results" aria-invalid={Boolean(fieldErrors.city_id)} aria-describedby={fieldErrors.city_id ? "contact-city-error" : undefined} /></label>
+      <label htmlFor="contact-city">Mesto<input id="contact-city" type="search" value={cityText} onChange={(event) => updateCityText(event.target.value)} placeholder="Pretražite mesta" autoComplete="off" disabled={cityCreateLoading} role="combobox" aria-autocomplete="list" aria-expanded={cityResults.length > 0} aria-controls="contact-city-results" aria-invalid={Boolean(fieldErrors.city_id)} aria-describedby={fieldErrors.city_id ? "contact-city-error" : undefined} /></label>
       <input type="hidden" name="city_id" value={values.city_id} />
       {cityLoading && <p className="city-search-status" role="status">Pretraživanje mesta…</p>}
       {citySearchError && <p className="city-search-error" role="alert">{citySearchError}</p>}
-      {!cityLoading && !citySearchError && cityText.trim().length >= 2 && !selectedCity && cityResults.length === 0 && <p className="city-search-status" role="status">Nema rezultata.</p>}
+      {!cityLoading && !citySearchError && cityText.trim().length >= 2 && !selectedCity && cityResults.length === 0 && <>
+        <p className="city-search-status" role="status">Nema rezultata.</p>
+        <button type="button" className="city-create-button" onClick={createCity} disabled={cityCreateLoading}>{cityCreateLoading ? "Kreiranje mesta…" : "Kreiraj novo mesto"}</button>
+      </>}
+      {cityCreateError && <p className="city-search-error" role="alert">{cityCreateError}</p>}
       {cityResults.length > 0 && <ul className="city-results" id="contact-city-results" role="listbox" aria-label="Rezultati pretrage mesta">
         {cityResults.map((city) => <li key={city.id} role="option" aria-selected="false"><button type="button" className="city-result" onClick={() => selectCity(city)}>{city.name}</button></li>)}
       </ul>}
