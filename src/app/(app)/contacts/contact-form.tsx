@@ -101,11 +101,12 @@ export function ContactForm({
   }
 
   async function createCity() {
-    if (cityCreateLoading) return;
+    const name = cityText.trim();
+    if (cityCreateLoading || !name) return;
     setCityCreateLoading(true);
     setCityCreateError("");
     try {
-      const result = await createCityForContact(cityText);
+      const result = await createCityForContact(name);
       if (result.success) {
         selectCity(result.city);
       } else {
@@ -147,18 +148,18 @@ export function ContactForm({
     <label htmlFor="contact-phone">Telefon<input id="contact-phone" name="phone" type="tel" value={values.phone} onChange={(event) => updateField("phone", event.target.value)} maxLength={40} aria-invalid={Boolean(fieldErrors.phone)} aria-describedby={fieldErrors.phone ? "contact-phone-error" : undefined} />{fieldErrors.phone && <span className="field-error" id="contact-phone-error" role="alert">{fieldErrors.phone}</span>}</label>
     <label htmlFor="contact-email">Email<input id="contact-email" name="email" type="email" value={values.email} onChange={(event) => updateField("email", event.target.value)} maxLength={254} aria-invalid={Boolean(fieldErrors.email)} aria-describedby={fieldErrors.email ? "contact-email-error" : undefined} />{fieldErrors.email && <span className="field-error" id="contact-email-error" role="alert">{fieldErrors.email}</span>}</label>
     <div className="city-picker">
-      <label htmlFor="contact-city">Mesto<input id="contact-city" type="search" value={cityText} onChange={(event) => updateCityText(event.target.value)} placeholder="Pretražite mesta" autoComplete="off" disabled={cityCreateLoading} role="combobox" aria-autocomplete="list" aria-expanded={cityResults.length > 0} aria-controls="contact-city-results" aria-invalid={Boolean(fieldErrors.city_id)} aria-describedby={fieldErrors.city_id ? "contact-city-error" : undefined} /></label>
+      <div className="city-picker-row">
+        <label htmlFor="contact-city">Mesto<input id="contact-city" type="search" value={cityText} onChange={(event) => updateCityText(event.target.value)} placeholder="Pretražite mesta" autoComplete="off" disabled={cityCreateLoading} role="combobox" aria-autocomplete="list" aria-expanded={cityResults.length > 0} aria-controls="contact-city-results" aria-invalid={Boolean(fieldErrors.city_id)} aria-describedby={fieldErrors.city_id ? "contact-city-error" : undefined} /></label>
+        <button type="button" className="button-link secondary city-create-toggle" onClick={createCity} disabled={cityCreateLoading || !cityText.trim()}>{cityCreateLoading ? "Kreiranje mesta…" : "Dodaj novo mesto"}</button>
+      </div>
       <input type="hidden" name="city_id" value={values.city_id} />
       {cityLoading && <p className="city-search-status" role="status">Pretraživanje mesta…</p>}
       {citySearchError && <p className="city-search-error" role="alert">{citySearchError}</p>}
-      {!cityLoading && !citySearchError && cityText.trim().length >= 2 && !selectedCity && cityResults.length === 0 && <>
-        <p className="city-search-status" role="status">Nema rezultata.</p>
-        <button type="button" className="city-create-button" onClick={createCity} disabled={cityCreateLoading}>{cityCreateLoading ? "Kreiranje mesta…" : "Kreiraj novo mesto"}</button>
-      </>}
-      {cityCreateError && <p className="city-search-error" role="alert">{cityCreateError}</p>}
+      {!cityLoading && !citySearchError && cityText.trim().length >= 2 && !selectedCity && cityResults.length === 0 && <p className="city-search-status" role="status">Nema rezultata.</p>}
       {cityResults.length > 0 && <ul className="city-results" id="contact-city-results" role="listbox" aria-label="Rezultati pretrage mesta">
         {cityResults.map((city) => <li key={city.id} role="option" aria-selected="false"><button type="button" className="city-result" onClick={() => selectCity(city)}>{city.name}</button></li>)}
       </ul>}
+      {cityCreateError && <p className="city-search-error" role="alert">{cityCreateError}</p>}
       {fieldErrors.city_id && <span className="field-error" id="contact-city-error" role="alert">{fieldErrors.city_id}</span>}
     </div>
     {formError && <p className="error" role="alert">{formError}</p>}

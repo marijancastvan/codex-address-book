@@ -159,10 +159,12 @@ button.danger:hover:not(:disabled) { background: #8f3030; }
 .empty-state { margin: var(--space-5) 0 0; border: 1px dashed var(--color-border); border-radius: var(--radius-card); padding: var(--space-5); background: var(--color-section); }
 .contact-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: var(--space-5) 0; }
 .contact-form .actions { grid-column: 1 / -1; justify-content: flex-start; }
-.city-picker { position: relative; min-width: 0; }
-.city-picker > label { display: grid; gap: var(--space-2); }
+.city-picker { position: relative; grid-column: 1 / -1; min-width: 0; }
+.city-picker-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px; }
+.city-picker-row > label { display: grid; min-width: 0; gap: var(--space-2); }
+.city-create-toggle { justify-self: start; min-height: 44px; white-space: nowrap; }
 .city-picker input { width: 100%; min-width: 0; }
-.city-results { max-height: 220px; overflow-y: auto; margin: 6px 0 0; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-panel); list-style: none; }
+.city-results { box-sizing: border-box; width: calc((100% - 14px) / 2); max-height: 220px; overflow-y: auto; margin: 6px 0 0; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-panel); list-style: none; }
 .city-result { width: 100%; padding: 9px 10px; background: var(--color-panel); color: var(--color-text); text-align: left; font-weight: 400; }
 .city-result:hover, .city-result:focus-visible { background: var(--color-background); }
 .city-search-status, .city-search-error { margin: 6px 0 0; font-size: .9rem; }
@@ -254,6 +256,8 @@ th { color: var(--color-muted); font-size: .9rem; }
   .panel, .auth-card { padding: var(--space-5); }
   .toolbar, .heading { align-items: stretch; flex-direction: column; }
   .contact-form { grid-template-columns: 1fr; }
+  .city-picker-row { grid-template-columns: minmax(0, 1fr); }
+  .city-results { width: 100%; }
   .contact-desktop { display: none; }
   .contact-cards { display: block; }
   .dashboard-panel { padding: var(--space-5); }
